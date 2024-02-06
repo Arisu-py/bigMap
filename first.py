@@ -11,7 +11,7 @@ SCREEN_SIZE = [600, 450]
 
 class Example(QWidget):
     def __init__(self):
-        self.coords = '46.034077,51.529814'
+        self.coords = [46.034077, 51.529814]
         self.spn = [0.00419, 0.00419]
         self.redraw = True
         super().__init__()
@@ -42,7 +42,7 @@ class Example(QWidget):
             print("Http статус:", response.status_code, "(", response.reason, ")")
 
     def getImage(self):
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={self.coords}&spn={self.spn[0]},{self.spn[1]}&l=map"
+        map_request = f"https://static-maps.yandex.ru/1.x/?ll={self.coords[0]},{self.coords[1]}&spn={self.spn[0]},{self.spn[1]}&l=map"
         response = requests.get(map_request)
 
         if not response:
@@ -74,6 +74,18 @@ class Example(QWidget):
                 self.redraw = True
         if event.key() == Qt.Key_D:
             self.spn = [self.spn[0] + 0.001, self.spn[1] + 0.001]
+            self.redraw = True
+        if event.key() == Qt.Key_Up:
+            self.coords = [self.coords[0], self.coords[1] + 0.0028]
+            self.redraw = True
+        if event.key() == Qt.Key_Down:
+            self.coords = [self.coords[0], self.coords[1] - 0.0028]
+            self.redraw = True
+        if event.key() == Qt.Key_Left:
+            self.coords = [self.coords[0]  + 0.006, self.coords[1]]
+            self.redraw = True
+        if event.key() == Qt.Key_Right:
+            self.coords = [self.coords[0] - 0.006, self.coords[1]]
             self.redraw = True
 
     def paintEvent(self, event):
