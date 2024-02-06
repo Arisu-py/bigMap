@@ -4,12 +4,16 @@ import sys
 import requests
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtCore import Qt
 
 SCREEN_SIZE = [600, 450]
 
 
 class Example(QWidget):
     def __init__(self):
+        self.coords = '46.034077,51.529814'
+        self.spn = [0.00419, 0.00419]
+        self.redraw = True
         super().__init__()
         self.getImage()
         self.initUI()
@@ -38,9 +42,7 @@ class Example(QWidget):
             print("Http статус:", response.status_code, "(", response.reason, ")")
 
     def getImage(self):
-        coords = '46.034077,51.529814'
-        spn = '0.000457,0.00419'
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&spn={spn}&l=map"
+        map_request = f"https://static-maps.yandex.ru/1.x/?ll={self.coords}&spn={self.spn[0]},{self.spn[1]}&l=map"
         response = requests.get(map_request)
 
         if not response:
@@ -64,6 +66,22 @@ class Example(QWidget):
         self.image.move(0, 0)
         self.image.resize(600, 450)
         self.image.setPixmap(self.pixmap)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_U:
+            if self.spn[0] - 0.001 > 0 and self.spn[1] - 0.001 > 0:
+                self.spn = [self.spn[0] - 0.001, self.spn[1] - 0.001]
+                self.redraw = True
+        if event.key() == Qt.Key_D:
+            self.spn = [self.spn[0] + 0.001, self.spn[1] + 0.001]
+            self.redraw = True
+
+    def paintEvent(self, event):
+        if self.redraw:
+            self.getImage()
+            self.pixmap = QPixmap(self.map_file)
+            self.image.setPixmap(self.pixmap)
+            self.needs_reload = False
 
     def closeEvent(self, event):
         os.remove(self.map_file)
